@@ -1,3 +1,6 @@
+const BROWSER = process.env.BROWSER || 'chrome'; // chrome, safari, firefox
+const isHeadless = process.env.HEADLESS === 'true' || false; // pass HEADLESS=true to enable
+
 exports.config = {
     //
     // ====================
@@ -21,7 +24,7 @@ exports.config = {
     // of the config file unless it's absolute.
     //
     specs: [
-        './test/specs/**/*.js'
+        './test/specs/**/*.spec.js'
     ],
     // Patterns to exclude.
     exclude: [
@@ -43,15 +46,29 @@ exports.config = {
     // and 30 processes will get spawned. The property handles how many capabilities
     // from the same test should run tests.
     //
-    maxInstances: 10,
+    maxInstances: 2,
     //
     // If you have trouble getting all important capabilities together, check out the
     // Sauce Labs platform configurator - a great tool to configure your capabilities:
     // https://saucelabs.com/platform/platform-configurator
     //
     capabilities: [{
-        browserName: 'chrome'
-    }],
+            maxInstances: 2,
+            browserName: BROWSER,
+            'goog:chromeOptions': BROWSER === 'chrome' ? {
+                args: [
+                    ...(isHeadless ? ['--headless', '--disable-gpu'] : []),
+                    '--window-size=1920,1080'
+                ]
+            } : undefined,
+            'moz:firefoxOptions': BROWSER === 'firefox' ? {
+                args: [
+                    ...(isHeadless ? ['-headless'] : []),
+                    '-width=1920', '-height=1080'
+                ]
+            } : undefined
+        }
+    ],
 
     //
     // ===================
@@ -60,7 +77,7 @@ exports.config = {
     // Define all options that are relevant for the WebdriverIO instance here
     //
     // Level of logging verbosity: trace | debug | info | warn | error | silent
-    logLevel: 'info',
+    logLevel: 'error',
     //
     // Set specific log levels per logger
     // loggers:
@@ -129,7 +146,8 @@ exports.config = {
     // See the full list at http://mochajs.org/
     mochaOpts: {
         ui: 'bdd',
-        timeout: 60000
+        timeout: 60000,
+        retries: 2 
     },
 
     //

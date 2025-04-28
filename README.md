@@ -8,5 +8,6 @@ npm install
 ```
 Then type
 ```
-npm run wdio
+HEADLESS=true BROWSER=chrome npx wdio run wdio.conf.js
 ```
+You can set HEADLESS to [true or false] and BROWSER to [safari, chrome or firefox]
