@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { expect } = require('@wdio/globals')
 const LoginPage = require('../pageobjects/login.page')
 const DashboardPage = require('../pageobjects/dashboard.page')
@@ -8,11 +9,16 @@ const BOARD_TITLE = `Board ${Date.now()}`;
 const LIST_NAME = 'My first list';
 
 describe('Trello automation', () => {
-    it('should create a board from dashboard', async () => {
+    it('should successful Sign-In', async () => {
         await LoginPage.open()
 
-        await LoginPage.login('kliver1998@hotmail.com', '123Trello456')
+        await LoginPage.login(process.env.TRELLO_USERNAME, process.env.TRELLO_PASSWORD)
         await browser.pause(5000); //Verification code
+
+        await expect(DashboardPage.btnCreateMenu).toBeDisplayed();
+    })
+
+    it('should create new board from dashboard', async () => {
         await DashboardPage.btnCreateMenu.click()
         await BoardModalPage.btnCreateBoard.click()
         await BoardModalPage.inputBoardTitle.setValue(BOARD_TITLE);
@@ -23,7 +29,7 @@ describe('Trello automation', () => {
         expect(await browser.getTitle()).toHaveText(BOARD_TITLE)
     });
 
-    it(`should create a list from board ${BOARD_TITLE}`, async () => {
+    it(`should create new list from board ${BOARD_TITLE}`, async () => {
         await BoardPage.textareaListName.waitForEnabled({ timeout: 5000});
         await BoardPage.textareaListName.setValue(LIST_NAME);
         await BoardPage.btnCreateList.click();
@@ -32,7 +38,7 @@ describe('Trello automation', () => {
     });
 
     after(async () => {
-        //Close board, no delete them
+        //Close board, does not delete it
         await DashboardPage.hoverOverBoardCard(BOARD_TITLE);
         await DashboardPage.btnBoardActionMenu(BOARD_TITLE).click();
         await BoardModalPage.btnCloseBoard.click();
