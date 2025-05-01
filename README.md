@@ -12,6 +12,7 @@ Third you need to create `.env` file in root with information of recently create
 ```
 TRELLO_USERNAME="example@email.com"
 TRELLO_PASSWORD="your_password"
+TRELLO_USERNAME="usernameWithout@"
 ```
 Then type
 ```

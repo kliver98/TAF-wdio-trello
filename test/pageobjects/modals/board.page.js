@@ -1,9 +1,6 @@
 const { $ } = require('@wdio/globals')
 const Page = require('../page');
 
-/**
- * sub page containing specific selectors and methods for a specific page
- */
 class BoardModalPage extends Page {
     get btnCreateBoard() {
         return $('button[data-testid="header-create-board-button"]');

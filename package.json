@@ -8,7 +8,7 @@
     "wdio": "wdio run ./wdio.conf.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Kliver Giron",
   "license": "ISC",
   "devDependencies": {
     "@wdio/cli": "^9.12.7",
