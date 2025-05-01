@@ -29,8 +29,8 @@ class NavigationBarPage extends Page {
     }
 
     async typeInSearch(textToSearch) {
+        await this.inputSearch.click();
         await this.inputSearch.setValue(textToSearch);
-        //await browser.pause(30*1000);
     }
 
     async searchBoardFound(title) {

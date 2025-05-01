@@ -6,17 +6,19 @@ const DashboardPage = require('../pageobjects/dashboard.page')
 const ProfilePage = require('../pageobjects/profile.page')
 const BoardModalPage = require('../pageobjects/modals/board.page')
 const NavigationBarPage = require('../pageobjects/navigationBar.page')
+const WorkspaceSettingsPage = require('../pageobjects/workspaceSettings.page')
 
 const currentTimeMils = Date.now();
 const BOARD_TITLE = `Board ${currentTimeMils}`;
 const LIST_NAME = 'My first list';
+const CARDS = ['First Card', 'Second Card'];
+const NEW_WORKSPACE_NAME = `Super Duper Workspace ${currentTimeMils}`;
 
 describe('Trello automation', () => {
     it('should successful Sign-In', async () => {
         await LoginPage.open();
 
         await LoginPage.login(process.env.TRELLO_EMAIL, process.env.TRELLO_PASSWORD);
-        await browser.pause(2500); //Verification code
 
         await expect(NavigationBarPage.btnCreateMenu).toBeDisplayed();
     })
@@ -71,6 +73,13 @@ describe('Trello automation', () => {
     });
 
     it('should create a new card', async () => {
+        await browser.pause(1000); //TODO: remove this
+
+        await BoardPage.clickAddCardInList(LIST_NAME);
+        await BoardPage.typeAndAddCard(CARDS[0]);
+        const cardFound = await BoardPage.getCard(LIST_NAME, CARDS[0]);
+
+        await expect(cardFound).toBeExisting();
 
     });
 
@@ -78,8 +87,17 @@ describe('Trello automation', () => {
 
     });
 
-    it('should edit workspace', async () => {
+    it('should edit workspace name', async () => {
+        await DashboardPage.open();
+        await DashboardPage.linkToSettings.click();
+        await WorkspaceSettingsPage.btnEditName.click();
 
+        await WorkspaceSettingsPage.typeWorkspaceName(NEW_WORKSPACE_NAME);
+        await WorkspaceSettingsPage.btnSubmit.click();
+        await DashboardPage.open();
+        await DashboardPage.linkToSettings.click();
+
+        await expect(await WorkspaceSettingsPage.workspaceTitle(NEW_WORKSPACE_NAME)).toBeExisting();
     });
 
     after(async () => {
