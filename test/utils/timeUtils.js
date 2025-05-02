@@ -1,29 +1,35 @@
-/**
- * Gets the current time and adds one hour, returning the result in HH:MM:SS AM/PM format.
- *
- * @returns {string} The formatted time string (e.g., "01:23:45 PM").
- */
-function getCurrentHourPlusOne() {
-  const now = new Date();
-  let hours = now.getHours();
-  const minutes = now.getMinutes();
-  const seconds = now.getSeconds();
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-
-  hours = hours % 12;
-  hours = hours ? hours : 12; // the hour '0' should be '12'
-
-  // Add one hour
-  hours = (hours + 1) % 13; // Modulo 13 handles the 12 -> 1 case.
-  if (hours === 0) {
-    hours = 1;
-  }
-
-  const formattedHours = String(hours).padStart(2, '0');
-  const formattedMinutes = String(minutes).padStart(2, '0');
-  const formattedSeconds = String(seconds).padStart(2, '0');
-
-  return `${formattedHours}:${formattedMinutes}:${formattedSeconds} ${ampm}`;
+function getCurrentTime() {
+  return new Date();
 }
 
-export { getCurrentHourPlusOne };
+function addHours(date, hours) {
+  const newDate = new Date(date);
+  newDate.setHours(newDate.getHours() + hours);
+  return newDate;
+}
+
+function convertTo12HourFormat(hours24) {
+  const ampm = hours24 >= 12 ? 'PM' : 'AM';
+  let hours12 = hours24 % 12;
+  if (hours12 === 0) hours12 = 12;
+  return { hours12, ampm };
+}
+
+function pad(value) {
+  return String(value).padStart(2, '0');
+}
+
+function formatTime(date) {
+  const { hours12, ampm } = convertTo12HourFormat(date.getHours());
+  const minutes = pad(date.getMinutes());
+  const hours = pad(hours12);
+  return `${hours}:${minutes} ${ampm}`;
+}
+
+function addHoursToCurrentTime(hours) {
+  const now = getCurrentTime();
+  const later = addHours(now, hours);
+  return formatTime(later);
+}
+
+export { addHoursToCurrentTime };

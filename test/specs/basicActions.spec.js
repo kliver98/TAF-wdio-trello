@@ -7,11 +7,15 @@ const ProfilePage = require('../pageobjects/profile.page');
 const BoardModalPage = require('../pageobjects/modals/board.page');
 const NavigationBarPage = require('../pageobjects/navigationBar.page');
 const WorkspaceSettingsPage = require('../pageobjects/workspaceSettings.page');
+const { addHoursToCurrentTime } = require('../utils/timeUtils');
 
 const currentTimeMils = Date.now();
 const BOARD_TITLE = `Board ${currentTimeMils}`;
 const LIST_NAME = 'My first list';
-const CARDS = ['First Card', 'Second Card'];
+const CARDS = [
+  { title: 'First Card', hoursDueDate: 1 },
+  { title: 'Second Card', hoursDueDate: 72 },
+];
 const NEW_WORKSPACE_NAME = `Super Duper Workspace ${currentTimeMils}`;
 
 describe('Trello automation', () => {
@@ -22,6 +26,7 @@ describe('Trello automation', () => {
       process.env.TRELLO_EMAIL,
       process.env.TRELLO_PASSWORD
     );
+    await browser.pause(500); //Verification code
 
     await expect(NavigationBarPage.btnCreateMenu).toBeDisplayed();
   });
@@ -42,7 +47,7 @@ describe('Trello automation', () => {
     await NavigationBarPage.btnCreateMenu.click();
     await BoardModalPage.btnCreateBoard.click();
     await BoardModalPage.inputBoardTitle.setValue(BOARD_TITLE);
-    await BoardModalPage.btnSubmit.waitForClickable({ timeout: 5000 });
+    await BoardModalPage.btnSubmit.waitForClickable();
     await BoardModalPage.btnSubmit.click();
 
     await expect(BoardPage.boardNameDisplay).toHaveText(BOARD_TITLE);
@@ -78,20 +83,22 @@ describe('Trello automation', () => {
 
   it('should create a new card', async () => {
     await browser.pause(1000); //TODO: remove this
+    await BoardPage.createCardInList(LIST_NAME, CARDS[0].title);
 
-    await BoardPage.clickAddCardInList(LIST_NAME);
-    await BoardPage.typeAndAddCard(CARDS[0]);
-    const cardFound = await BoardPage.getCard(LIST_NAME, CARDS[0]);
-
-    await expect(cardFound).toBeExisting();
+    await expect(BoardPage.linkCard(CARDS[0].title)).toBeExisting();
   });
 
   it('should filter cards by due date', async () => {
-    await BoardPage.clickAddCardInList(LIST_NAME);
-    await BoardPage.typeAndAddCard(CARDS[1]);
+    await browser.refresh(); //TODO: remove this
+    await browser.pause(1000); //TODO: remove this
+    await BoardPage.createCardInList(LIST_NAME, CARDS[1].title);
 
-    await BoardPage.getCard(BOARD_TITLE, CARDS[0]).click();
-    await BoardPage.getCard(BOARD_TITLE, CARDS[1]).click();
+    await BoardPage.linkCard(CARDS[0].title).click();
+    await BoardPage.setDueDate(addHoursToCurrentTime(CARDS[0].hoursDueDate));
+    await BoardPage.linkCard(CARDS[1].title).click();
+    await BoardPage.setDueDate(addHoursToCurrentTime(CARDS[1].hoursDueDate));
+
+    await expect(1).toEqual(1); //TODO: finish verification
   });
 
   it('should edit workspace name', async () => {

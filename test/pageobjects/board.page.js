@@ -30,18 +30,31 @@ class BoardPage extends Page {
     return $('button[data-testid="card-back-due-date-button"]');
   }
 
-  async setDueDate() {
-    this.btnDates.click();
+  get inputTime() {
+    return $('input[placeholder="Add time"]');
   }
 
-  async getCard(boardTitle, cardTitle) {
-    const listBoards = await this.listBoards;
-    for (const listBoard of listBoards) {
-      const elementFound = await listBoard.$(`//h2[text()='${boardTitle}']`);
-      if (elementFound.isExisting()) {
-        return listBoard.$(`//a[text()="${cardTitle}"]`);
-      }
-    }
+  get btnAddCard() {
+    return $('//button[@data-testid="list-add-card-button"]');
+  }
+
+  get btnCloseDialog() {
+    return $('button[aria-label="Close dialog"]');
+  }
+
+  linkCard(cardTitle) {
+    return $(`//a[@data-testid="card-name"][text()="${cardTitle}"]`);
+  }
+
+  listTitle(listTitle) {
+    return $(`//ol[@id="board"]/li/div//h2[text()="${listTitle}"]`);
+  }
+
+  async setDueDate(newTime = '', closeDialog = true) {
+    await this.btnDates.click();
+    await this.inputTime.setValue(newTime);
+    await super.btnSubmit.click();
+    if (closeDialog) await this.btnCloseDialog.click();
   }
 
   async typeAndAddCard(textToAdd) {
@@ -50,16 +63,22 @@ class BoardPage extends Page {
     await super.btnSubmit.click();
   }
 
-  async clickAddCardInList(listTitle) {
+  async createCardInList(listTitle, textToAdd) {
     const listBoards = await this.listBoards;
+
     for (const listBoard of listBoards) {
-      const elementFound = await listBoard.$(`//h2[text()='${listTitle}']`);
-      if (elementFound.isExisting()) {
-        await listBoard
-          .$('//button[@data-testid="list-add-card-button"]')
-          .click();
+      const elementFound = await listBoard.$(`//h2[text()="${listTitle}"]`);
+      if (await elementFound.isExisting()) {
+        const addButton = await listBoard.$(
+          '//button[@data-testid="list-add-card-button"]'
+        );
+        await addButton.click();
+        await this.typeAndAddCard(textToAdd);
+        return;
       }
     }
+
+    throw new Error(`List "${listTitle}" not found.`);
   }
 }
 
