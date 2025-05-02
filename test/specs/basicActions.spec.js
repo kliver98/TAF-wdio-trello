@@ -7,15 +7,16 @@ const ProfilePage = require('../pageobjects/profile.page');
 const BoardModalPage = require('../pageobjects/modals/board.page');
 const NavigationBarPage = require('../pageobjects/navigationBar.page');
 const WorkspaceSettingsPage = require('../pageobjects/workspaceSettings.page');
-const { addHoursToCurrentTime } = require('../utils/timeUtils');
+const {
+  addHoursToCurrentTime,
+  addDaysToGivenDate,
+  formatDateToMDY,
+} = require('../utils/timeUtils');
 
 const currentTimeMils = Date.now();
 const BOARD_TITLE = `Board ${currentTimeMils}`;
 const LIST_NAME = 'My first list';
-const CARDS = [
-  { title: 'First Card', hoursDueDate: 1 },
-  { title: 'Second Card', hoursDueDate: 72 },
-];
+const CARDS = ['First Card', 'Second Card'];
 const NEW_WORKSPACE_NAME = `Super Duper Workspace ${currentTimeMils}`;
 
 describe('Trello automation', () => {
@@ -83,22 +84,26 @@ describe('Trello automation', () => {
 
   it('should create a new card', async () => {
     await browser.pause(1000); //TODO: remove this
-    await BoardPage.createCardInList(LIST_NAME, CARDS[0].title);
+    await BoardPage.createCardInList(LIST_NAME, CARDS[0]);
 
-    await expect(BoardPage.linkCard(CARDS[0].title)).toBeExisting();
+    await expect(BoardPage.linkCard(CARDS[0])).toBeExisting();
   });
 
   it('should filter cards by due date', async () => {
     await browser.refresh(); //TODO: remove this
     await browser.pause(1000); //TODO: remove this
-    await BoardPage.createCardInList(LIST_NAME, CARDS[1].title);
+    await BoardPage.createCardInList(LIST_NAME, CARDS[1]);
 
-    await BoardPage.linkCard(CARDS[0].title).click();
-    await BoardPage.setDueDate(addHoursToCurrentTime(CARDS[0].hoursDueDate));
-    await BoardPage.linkCard(CARDS[1].title).click();
-    await BoardPage.setDueDate(addHoursToCurrentTime(CARDS[1].hoursDueDate));
+    await BoardPage.linkCard(CARDS[0]).click();
+    await BoardPage.setDateDueDate(formatDateToMDY(new Date()), false);
+    await BoardPage.setTimeDueDate(addHoursToCurrentTime(1));
+    await BoardPage.linkCard(CARDS[1]).click();
+    await BoardPage.setDateDueDate(addDaysToGivenDate(3, new Date()));
 
-    await expect(1).toEqual(1); //TODO: finish verification
+    await BoardPage.selectFilterDueDate('Due in the next day');
+    await BoardPage.headerSubtitle.waitForDisplayed();
+
+    await expect(BoardPage.headerSubtitle).toHaveText('1 card matches filters');
   });
 
   it('should edit workspace name', async () => {

@@ -34,12 +34,32 @@ class BoardPage extends Page {
     return $('input[placeholder="Add time"]');
   }
 
+  get inputDate() {
+    return $('input[data-testid="due-date-field"]');
+  }
+
   get btnAddCard() {
     return $('//button[@data-testid="list-add-card-button"]');
   }
 
   get btnCloseDialog() {
     return $('button[aria-label="Close dialog"]');
+  }
+
+  get btnFilter() {
+    return $('button[data-testid="filter-popover-button"]');
+  }
+
+  get btnPopoverClose() {
+    return $('button[data-testid="popover-close"]');
+  }
+
+  get headerSubtitle() {
+    return $('//div[@data-testid="list-header"]/p');
+  }
+
+  containerDueDate(text) {
+    return $(`//div[text()="${text}"]`);
   }
 
   linkCard(cardTitle) {
@@ -50,9 +70,22 @@ class BoardPage extends Page {
     return $(`//ol[@id="board"]/li/div//h2[text()="${listTitle}"]`);
   }
 
-  async setDueDate(newTime = '', closeDialog = true) {
+  async selectFilterDueDate(textOption = 'No dates') {
+    await this.btnFilter.click();
+    await this.containerDueDate(textOption).click();
+    await this.btnPopoverClose.click();
+  }
+
+  async setTimeDueDate(newTime = '', closeDialog = true) {
     await this.btnDates.click();
     await this.inputTime.setValue(newTime);
+    await super.btnSubmit.click();
+    if (closeDialog) await this.btnCloseDialog.click();
+  }
+
+  async setDateDueDate(newDate = '', closeDialog = true) {
+    await this.btnDates.click();
+    await this.inputDate.setValue(newDate);
     await super.btnSubmit.click();
     if (closeDialog) await this.btnCloseDialog.click();
   }

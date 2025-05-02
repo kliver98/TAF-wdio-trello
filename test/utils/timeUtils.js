@@ -32,4 +32,26 @@ function addHoursToCurrentTime(hours) {
   return formatTime(later);
 }
 
-export { addHoursToCurrentTime };
+function createDateObject(year, month, day) {
+  return new Date(year, month, day);
+}
+
+function addDays(date, days) {
+  const newDate = new Date(date);
+  newDate.setDate(newDate.getDate() + days);
+  return newDate;
+}
+
+function formatDateToMDY(date) {
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const year = date.getFullYear();
+  return `${month}/${day}/${year}`;
+}
+
+function addDaysToGivenDate(numberOfDays = 1, date = new Date()) {
+  const futureDate = addDays(date, numberOfDays);
+  return formatDateToMDY(futureDate);
+}
+
+export { addHoursToCurrentTime, addDaysToGivenDate, formatDateToMDY };

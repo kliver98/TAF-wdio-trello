@@ -19,6 +19,7 @@ class ProfilePage extends Page {
   }
 
   async typeUsername(username) {
+    await this.inputUsername.waitForClickable();
     await this.inputUsername.setValue(username);
   }
 
