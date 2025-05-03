@@ -26,24 +26,6 @@ class NavigationBarPage extends Page {
       '//div[@data-test-id="search-dialog-dialog-wrapper"]//div[@data-testid="persist-recent-search"]'
     );
   }
-
-  async goToProfile() {
-    await this.btnOpenMemberMenu.click();
-    await this.linkMenuProfile.click();
-  }
-
-  async typeInSearch(textToSearch) {
-    await this.inputSearch.click();
-    await this.inputSearch.setValue(textToSearch);
-  }
-
-  async searchBoardFound(title) {
-    const boardsFound = await this.listBoardsFound;
-    for (const board of boardsFound) {
-      const elementFound = await board.$(`//span[text()='${title}']`);
-      if (elementFound.isExisting()) return elementFound;
-    }
-  }
 }
 
 module.exports = new NavigationBarPage();

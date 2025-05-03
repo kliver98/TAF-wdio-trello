@@ -2,9 +2,9 @@ function getCurrentTime() {
   return new Date();
 }
 
-function addHours(date, hours) {
+function addMinutes(date, minutes) {
   const newDate = new Date(date);
-  newDate.setHours(newDate.getHours() + hours);
+  newDate.setMinutes(newDate.getMinutes() + minutes);
   return newDate;
 }
 
@@ -26,14 +26,10 @@ function formatTime(date) {
   return `${hours}:${minutes} ${ampm}`;
 }
 
-function addHoursToCurrentTime(hours) {
+function addMinutesToCurrentTime(minutes) {
   const now = getCurrentTime();
-  const later = addHours(now, hours);
+  const later = addMinutes(now, minutes);
   return formatTime(later);
-}
-
-function createDateObject(year, month, day) {
-  return new Date(year, month, day);
 }
 
 function addDays(date, days) {
@@ -54,4 +50,4 @@ function addDaysToGivenDate(numberOfDays = 1, date = new Date()) {
   return formatDateToMDY(futureDate);
 }
 
-export { addHoursToCurrentTime, addDaysToGivenDate, formatDateToMDY };
+export { addMinutesToCurrentTime, addDaysToGivenDate, formatDateToMDY };

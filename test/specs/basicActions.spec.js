@@ -1,14 +1,18 @@
 require('dotenv').config();
 const { expect } = require('@wdio/globals');
-const LoginPage = require('../pageobjects/login.page');
 const BoardPage = require('../pageobjects/board.page');
-const DashboardPage = require('../pageobjects/dashboard.page');
 const ProfilePage = require('../pageobjects/profile.page');
-const BoardModalPage = require('../pageobjects/modals/board.page');
 const NavigationBarPage = require('../pageobjects/navigationBar.page');
 const WorkspaceSettingsPage = require('../pageobjects/workspaceSettings.page');
+const LoginWorkflow = require('../workflows/login.workflow');
+const BoardWorkflow = require('../workflows/board.workflow');
+const DashboardWorkflow = require('../workflows/dashboard.workflow');
+const ProfileWorkflow = require('../workflows/profile.workflow');
+const BoardModalWorkflow = require('../workflows/modals/board.workspace');
+const NavigationBarWorkflow = require('../workflows/navigationBar.workflow');
+const WorkspaceSettingsWorkflow = require('../workflows/workspaceSettings.workflow');
 const {
-  addHoursToCurrentTime,
+  addMinutesToCurrentTime,
   addDaysToGivenDate,
   formatDateToMDY,
 } = require('../utils/timeUtils');
@@ -21,13 +25,10 @@ const NEW_WORKSPACE_NAME = `Super Duper Workspace ${currentTimeMils}`;
 
 describe('Trello automation', () => {
   it('should successful Sign-In', async () => {
-    await LoginPage.open();
-
-    await LoginPage.login(
+    await LoginWorkflow.loginUser(
       process.env.TRELLO_EMAIL,
       process.env.TRELLO_PASSWORD
     );
-    await browser.pause(500); //Verification code
 
     await expect(NavigationBarPage.btnCreateMenu).toBeDisplayed();
   });
@@ -35,10 +36,9 @@ describe('Trello automation', () => {
   it('should edit user profile', async () => {
     let newUsername = `username${currentTimeMils}`;
 
-    await NavigationBarPage.goToProfile();
-    await ProfilePage.typeUsername(newUsername);
-    await ProfilePage.typeBio(`New Bio info ${currentTimeMils}`);
-    await ProfilePage.btnSubmit.click();
+    await NavigationBarWorkflow.goToProfile();
+    await ProfileWorkflow.typeUsername(newUsername);
+    await ProfileWorkflow.typeBio(`New Bio info ${currentTimeMils}`, true);
 
     await expect(ProfilePage.spanSavedFlag).toBeDisplayed();
     expect(await browser.getUrl()).toContain(newUsername);
@@ -46,17 +46,14 @@ describe('Trello automation', () => {
 
   it('should create new board from dashboard', async () => {
     await NavigationBarPage.btnCreateMenu.click();
-    await BoardModalPage.btnCreateBoard.click();
-    await BoardModalPage.inputBoardTitle.setValue(BOARD_TITLE);
-    await BoardModalPage.btnSubmit.waitForClickable();
-    await BoardModalPage.btnSubmit.click();
+    await BoardModalWorkflow.createBoard(BOARD_TITLE);
 
     await expect(BoardPage.boardNameDisplay).toHaveText(BOARD_TITLE);
     expect(await browser.getTitle()).toHaveText(BOARD_TITLE);
   });
 
   it('should search for existing board', async () => {
-    await NavigationBarPage.typeInSearch(BOARD_TITLE);
+    await NavigationBarWorkflow.typeInSearch(BOARD_TITLE);
     await browser.waitUntil(
       async () => (await NavigationBarPage.listBoardsFound).length > 0,
       {
@@ -66,66 +63,62 @@ describe('Trello automation', () => {
       }
     );
     const found = await NavigationBarPage.listBoardsFound;
-    const boardFound = await NavigationBarPage.searchBoardFound(BOARD_TITLE);
+    const boardFound = await NavigationBarWorkflow.searchBoardFound(
+      BOARD_TITLE
+    );
 
     await expect(found).toHaveLength(1);
     await expect(boardFound).toBeExisting();
   });
 
   it(`should create new list from board ${BOARD_TITLE}`, async () => {
-    await browser.refresh();
-    await BoardPage.btnAddList.click();
-    await BoardPage.textareaListName.waitForEnabled({ timeout: 1000 });
-    await BoardPage.textareaListName.setValue(LIST_NAME);
-    await BoardPage.btnCreateList.click();
+    await browser.keys('Escape');
+    await BoardWorkflow.createList(LIST_NAME);
 
-    await expect(BoardPage.listName).toHaveText(LIST_NAME);
+    await expect(BoardPage.searchListName(LIST_NAME)).toBeExisting();
   });
 
   it('should create a new card', async () => {
-    await browser.pause(1000); //TODO: remove this
-    await BoardPage.createCardInList(LIST_NAME, CARDS[0]);
+    await browser.pause(500);
+    await BoardWorkflow.createCardInList(LIST_NAME, CARDS[0]);
 
     await expect(BoardPage.linkCard(CARDS[0])).toBeExisting();
   });
 
   it('should filter cards by due date', async () => {
-    await browser.refresh(); //TODO: remove this
-    await browser.pause(1000); //TODO: remove this
-    await BoardPage.createCardInList(LIST_NAME, CARDS[1]);
+    await BoardWorkflow.createCardInList(LIST_NAME, CARDS[1]);
 
     await BoardPage.linkCard(CARDS[0]).click();
-    await BoardPage.setDateDueDate(formatDateToMDY(new Date()), false);
-    await BoardPage.setTimeDueDate(addHoursToCurrentTime(1));
+    await BoardWorkflow.setDateDueDate(formatDateToMDY(new Date()), false);
+    await BoardWorkflow.setTimeDueDate(addMinutesToCurrentTime(1));
     await BoardPage.linkCard(CARDS[1]).click();
-    await BoardPage.setDateDueDate(addDaysToGivenDate(3, new Date()));
+    await BoardWorkflow.setDateDueDate(addDaysToGivenDate(3, new Date()));
 
-    await BoardPage.selectFilterDueDate('Due in the next day');
-    await BoardPage.headerSubtitle.waitForDisplayed();
+    await BoardWorkflow.selectFilterDueDate('Due in the next day');
+    await BoardPage.headerSubtitleInList(LIST_NAME).waitForDisplayed();
 
-    await expect(BoardPage.headerSubtitle).toHaveText('1 card matches filters');
+    await expect(BoardPage.headerSubtitleInList(LIST_NAME)).toHaveText(
+      '1 card matches filters'
+    );
   });
 
   it('should edit workspace name', async () => {
-    await DashboardPage.open();
-    await DashboardPage.linkToSettings.click();
+    await DashboardWorkflow.goToSettings();
     await WorkspaceSettingsPage.btnEditName.click();
 
-    await WorkspaceSettingsPage.typeWorkspaceName(NEW_WORKSPACE_NAME);
-    await WorkspaceSettingsPage.btnSubmit.click();
-    await DashboardPage.open();
-    await DashboardPage.linkToSettings.click();
+    await WorkspaceSettingsWorkflow.typeWorkspaceName(NEW_WORKSPACE_NAME);
+    await DashboardWorkflow.goToSettings();
 
     await expect(
-      await WorkspaceSettingsPage.workspaceTitle(NEW_WORKSPACE_NAME)
+      WorkspaceSettingsPage.workspaceTitle(NEW_WORKSPACE_NAME)
     ).toBeExisting();
   });
 
   after(async () => {
-    //Close board, does not delete it
-    await DashboardPage.hoverOverBoardCard(BOARD_TITLE);
-    await DashboardPage.btnBoardActionMenu(BOARD_TITLE).click();
-    await BoardModalPage.btnCloseBoard.click();
-    await BoardModalPage.btnCloseConfirm.click();
+    try {
+      await DashboardWorkflow.closeBoard(BOARD_TITLE);
+    } catch (error) {
+      console.warn(`Cannot delete board created: ${BOARD_TITLE}`);
+    }
   });
 });

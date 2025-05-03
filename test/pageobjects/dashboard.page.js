@@ -6,12 +6,11 @@ class DashboardPage extends Page {
     return $('a[data-testid="home-team-settings-tab"]');
   }
 
-  async hoverOverBoardCard(title) {
-    $(`//a[contains(@title, '${title}')]`).moveTo();
+  linkToBoardCard(title) {
+    return $(`//a[contains(@title, '${title}')]`);
   }
 
-  btnBoardActionMenu(boardTitle) {
-    this.hoverOverBoardCard(boardTitle);
+  btnBoardActionMenu(boardTitle = 'Board Titles') {
     return $(
       `//a[contains(text(), '${boardTitle}')]/following::div[@role='menu']/button`
     );

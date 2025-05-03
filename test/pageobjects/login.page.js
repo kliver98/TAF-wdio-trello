@@ -10,13 +10,6 @@ class LoginPage extends Page {
     return $('#password');
   }
 
-  async login(username, password) {
-    await this.inputUsername.setValue(username);
-    await super.btnSubmit.click();
-    await this.inputPassword.setValue(password);
-    await super.btnSubmit.click();
-  }
-
   open() {
     return super.open('login');
   }

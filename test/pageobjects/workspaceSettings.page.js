@@ -6,12 +6,12 @@ class WorkspaceSettingsPage extends Page {
     return $('//h2/button');
   }
 
-  async workspaceTitle(title) {
-    return $(`//h2[text()='${title}']`);
+  get inputDisplayName() {
+    return $('input[id="displayName"]');
   }
 
-  async typeWorkspaceName(newName) {
-    await $('input[id="displayName"]').setValue(newName);
+  workspaceTitle(title) {
+    return $(`//h2[text()='${title}']`);
   }
 }
 

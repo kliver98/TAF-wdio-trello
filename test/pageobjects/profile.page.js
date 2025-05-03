@@ -18,19 +18,6 @@ class ProfilePage extends Page {
     return $('//div[@id="FlagGroup"]//span[text()="Saved"]');
   }
 
-  async typeUsername(username) {
-    await this.inputUsername.waitForClickable();
-    await this.inputUsername.setValue(username);
-  }
-
-  async typeBio(bioText) {
-    await this.textareaBio.setValue(bioText);
-  }
-
-  async goToProfile() {
-    await super.goToProfile();
-  }
-
   open() {
     return super.open('login');
   }
