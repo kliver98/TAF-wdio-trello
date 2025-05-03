@@ -1,0 +1,78 @@
+const { $ } = require('@wdio/globals');
+const Page = require('./page');
+
+class BoardPage extends Page {
+  get boardNameDisplay() {
+    return $('h1[data-testid="board-name-display"]');
+  }
+
+  get btnAddList() {
+    return $('button[data-testid="list-composer-button"]');
+  }
+
+  get textareaListName() {
+    return $('//textarea[following-sibling::div/button[@type="submit"]]');
+  }
+
+  get btnCreateList() {
+    return $('button[data-testid="list-composer-add-list-button"]');
+  }
+
+  get listBoards() {
+    return $$('//ol[@id="board"]/li/div');
+  }
+
+  get btnDates() {
+    return $('button[data-testid="card-back-due-date-button"]');
+  }
+
+  get inputTime() {
+    return $('input[placeholder="Add time"]');
+  }
+
+  get inputDate() {
+    return $('input[data-testid="due-date-field"]');
+  }
+
+  get btnAddCard() {
+    return $('//button[@data-testid="list-add-card-button"]');
+  }
+
+  get btnCloseDialog() {
+    return $('button[aria-label="Close dialog"]');
+  }
+
+  get btnFilter() {
+    return $('button[data-testid="filter-popover-button"]');
+  }
+
+  get btnPopoverClose() {
+    return $('button[data-testid="popover-close"]');
+  }
+
+  get textareaListCard() {
+    return $('textarea[data-testid="list-card-composer-textarea"]');
+  }
+
+  headerSubtitleInList(listTitle) {
+    return $(`//h2[text()="${listTitle}"]/ancestor::div/following-sibling::p`);
+  }
+
+  searchListName(listName) {
+    return $(`//h2[@data-testid="list-name"][text()="${listName}"]`);
+  }
+
+  containerDueDate(text) {
+    return $(`//div[text()="${text}"]`);
+  }
+
+  linkCard(cardTitle) {
+    return $(`//a[@data-testid="card-name"][text()="${cardTitle}"]`);
+  }
+
+  listTitle(listTitle) {
+    return $(`//ol[@id="board"]/li/div//h2[text()="${listTitle}"]`);
+  }
+}
+
+module.exports = new BoardPage();
