@@ -17,15 +17,12 @@ Second you need to create a Trello account (please create and do not use an old 
 Third you need to create `.env` file in root with information of recently created account
 
 ```
-TRELLO_USERNAME="example@email.com"
+TRELLO_EMAIL="example@email.com"
 TRELLO_PASSWORD="your_password"
-TRELLO_USERNAME="usernameWithout@"
 ```
 
 Then type
 
 ```
-HEADLESS=true BROWSER=chrome npx wdio run wdio.conf.js
+npx wdio run wdio.conf.js
 ```
-
-You can set HEADLESS to [true or false] and BROWSER to [safari, chrome or firefox]

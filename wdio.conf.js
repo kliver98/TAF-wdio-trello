@@ -1,4 +1,3 @@
-const BROWSER = process.env.BROWSER || 'chrome'; // chrome, safari, firefox
 const isHeadless = process.env.HEADLESS === 'true' || false; // pass HEADLESS=true to enable
 
 exports.config = {
@@ -44,41 +43,43 @@ exports.config = {
   // and 30 processes will get spawned. The property handles how many capabilities
   // from the same test should run tests.
   //
-  maxInstances: 1,
+  maxInstances: 3,
   //
   // If you have trouble getting all important capabilities together, check out the
   // Sauce Labs platform configurator - a great tool to configure your capabilities:
   // https://saucelabs.com/platform/platform-configurator
   //
   capabilities: [
+    // Chrome
     {
-      maxInstances: 1,
-      browserName: BROWSER,
-      'goog:chromeOptions':
-        BROWSER === 'chrome'
-          ? {
-              args: [
-                ...(isHeadless ? ['--headless', '--disable-gpu'] : []),
-                '--window-size=1920,1080',
-              ],
-            }
-          : undefined,
-      'moz:firefoxOptions':
-        BROWSER === 'firefox'
-          ? {
-              args: [
-                ...(isHeadless ? ['-headless'] : []),
-                '-width=1920',
-                '-height=1080',
-              ],
-            }
-          : undefined,
-      'safari.options':
-        BROWSER === 'safari'
-          ? {
-              technologyPreview: false,
-            }
-          : undefined,
+      browserName: 'chrome',
+      'goog:chromeOptions': {
+        args: [
+          '--window-size=1920,1080',
+          ...(isHeadless
+            ? ['--headless=new', '--disable-gpu', '--no-sandbox']
+            : []),
+        ],
+      },
+    },
+
+    // Firefox
+    {
+      browserName: 'firefox',
+      'moz:firefoxOptions': {
+        args: [...(isHeadless ? ['-headless'] : [])],
+      },
+    },
+
+    // Edge
+    {
+      browserName: 'MicrosoftEdge',
+      'ms:edgeOptions': {
+        args: [
+          '--window-size=1920,1080',
+          ...(isHeadless ? ['--headless', '--disable-gpu'] : []),
+        ],
+      },
     },
   ],
 
@@ -129,10 +130,7 @@ exports.config = {
   // Services take over a specific job you don't want to take care of. They enhance
   // your test setup with almost no effort. Unlike plugins, they don't add new
   // commands. Instead, they hook themselves up into the test process.
-  services: [
-    ...(BROWSER === 'chrome' ? ['chromedriver'] : []),
-    ...(BROWSER === 'firefox' ? ['geckodriver'] : []),
-  ],
+  services: ['chromedriver', 'geckodriver', 'edgedriver'],
   //
   // Framework you want to run your specs with.
   // The following are supported: Mocha, Jasmine, and Cucumber
