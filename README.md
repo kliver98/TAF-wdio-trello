@@ -12,9 +12,9 @@ First install dependencies
 npm install
 ```
 
-Second you need to create a Trello account (please create and do not use an old one) and setup to be ready to work with default workspace and Board (The tests will create and close the new boards).
+Second you need to create a Trello account and setup to be ready to work. (The tests will create and try to close the new boards).
 
-Third you need to create `.env` file in root with information of recently created account
+Third you need to create `.env` file in root with information of account
 
 ```
 TRELLO_EMAIL="example@email.com"

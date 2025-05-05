@@ -7,8 +7,6 @@ class LoginWorkflow {
     await LoginPage.btnSubmit.click();
     await LoginPage.inputPassword.setValue(password);
     await LoginPage.btnSubmit.click();
-
-    await browser.pause(500);
   }
 }
 
