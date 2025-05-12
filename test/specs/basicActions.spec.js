@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { expect } = require('@wdio/globals');
+const chai = require('chai');
 const BoardPage = require('../pageobjects/board.page');
 const ProfilePage = require('../pageobjects/profile.page');
 const NavigationBarPage = require('../pageobjects/navigationBar.page');
@@ -11,11 +11,17 @@ const ProfileWorkflow = require('../workflows/profile.workflow');
 const BoardModalWorkflow = require('../workflows/modals/board.workspace');
 const NavigationBarWorkflow = require('../workflows/navigationBar.workflow');
 const WorkspaceSettingsWorkflow = require('../workflows/workspaceSettings.workflow');
+
+const expect = chai.expect;
+const assert = chai.assert;
+chai.should(); // Enables "should" style
+
 const {
   addMinutesToCurrentTime,
   addDaysToGivenDate,
   formatDateToMDY,
 } = require('../utils/timeUtils');
+const waitUtils = require('../utils/waitUtils');
 
 const currentTimeMils = Date.now();
 const BOARD_TITLE = `Board ${currentTimeMils}`;
@@ -23,14 +29,17 @@ const LIST_NAME = 'My first list';
 const CARDS = ['First Card', 'Second Card'];
 const NEW_WORKSPACE_NAME = `Super Duper Workspace ${currentTimeMils}`;
 
-describe('Trello automation', () => {
+describe('Assert Trello basic Actions', () => {
   it('should successful Sign-In', async () => {
     await LoginWorkflow.loginUser(
       process.env.TRELLO_EMAIL,
       process.env.TRELLO_PASSWORD
     );
 
-    await expect(NavigationBarPage.btnCreateMenu).toBeDisplayed();
+    await waitUtils.waitForElementDisplayed(NavigationBarPage.inputSearch);
+
+    const isDisplayed = await NavigationBarPage.btnCreateMenu.isDisplayed();
+    assert.isTrue(isDisplayed, 'Create button should be displayed after login');
   });
 
   it('should edit user profile', async () => {
@@ -40,49 +49,56 @@ describe('Trello automation', () => {
     await ProfileWorkflow.typeUsername(newUsername);
     await ProfileWorkflow.typeBio(`New Bio info ${currentTimeMils}`, true);
 
-    await expect(ProfilePage.spanSavedFlag).toBeDisplayed();
-    expect(await browser.getUrl()).toContain(newUsername);
+    await waitUtils.waitForElementDisplayed(ProfilePage.spanSavedFlag);
+
+    const currentUrl = await browser.getUrl();
+    assert.include(currentUrl, newUsername);
   });
 
   it('should create new board from dashboard', async () => {
     await NavigationBarPage.btnCreateMenu.click();
     await BoardModalWorkflow.createBoard(BOARD_TITLE);
 
-    await expect(BoardPage.boardNameDisplay).toHaveText(BOARD_TITLE);
-    expect(await browser.getTitle()).toHaveText(BOARD_TITLE);
+    await waitUtils.waitForElementDisplayed(BoardPage.boardNameDisplay);
+
+    const boardNameText = await BoardPage.boardNameDisplay.getText();
+    assert.strictEqual(boardNameText, BOARD_TITLE);
+
+    const pageTitle = await browser.getTitle();
+    assert.include(pageTitle, BOARD_TITLE);
   });
 
   it('should search for existing board', async () => {
     await NavigationBarWorkflow.typeInSearch(BOARD_TITLE);
-    await browser.waitUntil(
-      async () => (await NavigationBarPage.listBoardsFound).length > 0,
-      {
-        timeout: 1000,
-        timeoutMsg:
-          'Expected at least one board to be found, but none appeared',
-      }
+    await waitUtils.waitForListsHasElements(
+      () => NavigationBarPage.listBoardsFound
     );
-    const found = await NavigationBarPage.listBoardsFound;
+
+    const listBoardsFound = await NavigationBarPage.listBoardsFound;
     const boardFound = await NavigationBarWorkflow.searchBoardFound(
       BOARD_TITLE
     );
 
-    await expect(found).toHaveLength(1);
-    await expect(boardFound).toBeExisting();
+    listBoardsFound.should.have.lengthOf(1);
+    const exists = await boardFound.isExisting();
+    exists.should.be.true;
   });
 
   it(`should create new list from board ${BOARD_TITLE}`, async () => {
     await browser.keys('Escape');
     await BoardWorkflow.createList(LIST_NAME);
 
-    await expect(BoardPage.searchListName(LIST_NAME)).toBeExisting();
+    const listNameFound = BoardPage.searchListName(LIST_NAME);
+    const listNameExists = await listNameFound.isExisting();
+    listNameExists.should.be.true;
   });
 
   it('should create a new card', async () => {
-    await browser.pause(500);
     await BoardWorkflow.createCardInList(LIST_NAME, CARDS[0]);
 
-    await expect(BoardPage.linkCard(CARDS[0])).toBeExisting();
+    const lintToCardFound = BoardPage.linkCard(CARDS[0]);
+    const lintToCardExists = await lintToCardFound.isExisting();
+    expect(lintToCardExists).to.be.true;
   });
 
   it('should filter cards by due date', async () => {
@@ -95,11 +111,11 @@ describe('Trello automation', () => {
     await BoardWorkflow.setDateDueDate(addDaysToGivenDate(3, new Date()));
 
     await BoardWorkflow.selectFilterDueDate('Due in the next day');
-    await BoardPage.headerSubtitleInList(LIST_NAME).waitForDisplayed();
+    const headerSubtitleInList = BoardPage.headerSubtitleInList(LIST_NAME);
+    await headerSubtitleInList.waitForDisplayed();
 
-    await expect(BoardPage.headerSubtitleInList(LIST_NAME)).toHaveText(
-      '1 card matches filters'
-    );
+    const headerSubtitleText = await headerSubtitleInList.getText();
+    expect(headerSubtitleText).to.equal('1 card matches filters');
   });
 
   it('should edit workspace name', async () => {
@@ -109,9 +125,13 @@ describe('Trello automation', () => {
     await WorkspaceSettingsWorkflow.typeWorkspaceName(NEW_WORKSPACE_NAME);
     await DashboardWorkflow.goToSettings();
 
-    await expect(
-      WorkspaceSettingsPage.workspaceTitle(NEW_WORKSPACE_NAME)
-    ).toBeExisting();
+    const workspaceTitle =
+      WorkspaceSettingsPage.workspaceTitle(NEW_WORKSPACE_NAME);
+
+    await waitUtils.waitForElementDisplayed(workspaceTitle);
+
+    const workspaceTitleExists = await workspaceTitle.isExisting();
+    expect(workspaceTitleExists).to.be.true;
   });
 
   after(async () => {
