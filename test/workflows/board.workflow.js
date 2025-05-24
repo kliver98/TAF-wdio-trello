@@ -14,18 +14,25 @@ class BoardWorkflow {
     await BoardPage.btnPopoverClose.click();
   }
 
-  async setTimeDueDate(newTime = '', closeDialog = true) {
+  async openDateModal() {
     await BoardPage.btnDates.click();
+  }
+
+  async setTimeDueDate(newTime = '', closeDialog = true) {
+    await BoardPage.inputTime.clearValue();
     await BoardPage.inputTime.setValue(newTime);
-    await BoardPage.btnSubmit.click();
-    if (closeDialog) await BoardPage.btnCloseDialog.click();
+    if (closeDialog) await this.submitAndCloseDialog();
   }
 
   async setDateDueDate(newDate = '', closeDialog = true) {
-    await BoardPage.btnDates.click();
+    await BoardPage.inputDate.clearValue();
     await BoardPage.inputDate.setValue(newDate);
+    if (closeDialog) await this.submitAndCloseDialog();
+  }
+
+  async submitAndCloseDialog() {
     await BoardPage.btnSubmit.click();
-    if (closeDialog) await BoardPage.btnCloseDialog.click();
+    await BoardPage.btnCloseDialog.click();
   }
 
   async typeAndAddCard(textToAdd) {
@@ -46,6 +53,8 @@ class BoardWorkflow {
         try {
           await addButton.click();
         } catch (error) {
+          if (await BoardPage.closeDialog?.isExisting())
+            BoardPage.closeDialog.click();
           console.info(`Already opened: ${error}`);
         }
         await this.typeAndAddCard(textToAdd);

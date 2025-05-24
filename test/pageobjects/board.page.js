@@ -23,7 +23,7 @@ class BoardPage extends Page {
   }
 
   get btnDates() {
-    return $('button[data-testid="card-back-due-date-button"]');
+    return $('//button[text()="Dates"]');
   }
 
   get inputTime() {
@@ -47,7 +47,7 @@ class BoardPage extends Page {
   }
 
   get btnPopoverClose() {
-    return $('button[data-testid="popover-close"]');
+    return $('button[aria-label="Close popover"]');
   }
 
   get textareaListCard() {

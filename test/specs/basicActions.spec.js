@@ -105,9 +105,11 @@ describe('Assert Trello basic Actions', () => {
     await BoardWorkflow.createCardInList(LIST_NAME, CARDS[1]);
 
     await BoardPage.linkCard(CARDS[0]).click();
+    await BoardWorkflow.openDateModal();
     await BoardWorkflow.setDateDueDate(formatDateToMDY(new Date()), false);
-    await BoardWorkflow.setTimeDueDate(addMinutesToCurrentTime(1));
+    await BoardWorkflow.setTimeDueDate(addMinutesToCurrentTime(5));
     await BoardPage.linkCard(CARDS[1]).click();
+    await BoardWorkflow.openDateModal();
     await BoardWorkflow.setDateDueDate(addDaysToGivenDate(3, new Date()));
 
     await BoardWorkflow.selectFilterDueDate('Due in the next day');
