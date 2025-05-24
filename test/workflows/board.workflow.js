@@ -37,26 +37,21 @@ class BoardWorkflow {
 
   async typeAndAddCard(textToAdd) {
     await BoardPage.textareaListCard.setValue(textToAdd);
-    await BoardPage.btnSubmit.waitForClickable();
     await BoardPage.btnSubmit.click();
+    await BoardPage.btnCloseCardComposer.click();
   }
 
   async createCardInList(listTitle, textToAdd) {
     const listBoards = await BoardPage.listBoards;
 
     for (const listBoard of listBoards) {
-      const elementFound = await listBoard.$(`//h2[text()="${listTitle}"]`);
+      const elementFound = await BoardPage.listBoardWithText(
+        listBoard,
+        listTitle
+      );
       if (await elementFound.isExisting()) {
-        const addButton = await listBoard.$(
-          '//button[@data-testid="list-add-card-button"]'
-        );
-        try {
-          await addButton.click();
-        } catch (error) {
-          if (await BoardPage.closeDialog?.isExisting())
-            BoardPage.closeDialog.click();
-          console.info(`Already opened: ${error}`);
-        }
+        const addButton = await BoardPage.btnAddCardFromList(listBoard);
+        await addButton.click();
         await this.typeAndAddCard(textToAdd);
         return;
       }

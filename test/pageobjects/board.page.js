@@ -34,8 +34,8 @@ class BoardPage extends Page {
     return $('input[data-testid="due-date-field"]');
   }
 
-  get btnAddCard() {
-    return $('//button[@data-testid="list-add-card-button"]');
+  get btnCloseCardComposer() {
+    return $('button[data-testid="list-card-composer-cancel-button"]');
   }
 
   get btnCloseDialog() {
@@ -52,6 +52,14 @@ class BoardPage extends Page {
 
   get textareaListCard() {
     return $('textarea[data-testid="list-card-composer-textarea"]');
+  }
+
+  listBoardWithText(listBoard, listTitle) {
+    return listBoard.$(`//h2[text()="${listTitle}"]`);
+  }
+
+  btnAddCardFromList(listElement) {
+    return listElement.$('//button[@data-testid="list-add-card-button"]');
   }
 
   headerSubtitleInList(listTitle) {
