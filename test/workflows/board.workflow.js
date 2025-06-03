@@ -14,40 +14,44 @@ class BoardWorkflow {
     await BoardPage.btnPopoverClose.click();
   }
 
-  async setTimeDueDate(newTime = '', closeDialog = true) {
+  async openDateModal() {
     await BoardPage.btnDates.click();
+  }
+
+  async setTimeDueDate(newTime = '', closeDialog = true) {
+    await BoardPage.inputTime.clearValue();
     await BoardPage.inputTime.setValue(newTime);
-    await BoardPage.btnSubmit.click();
-    if (closeDialog) await BoardPage.btnCloseDialog.click();
+    if (closeDialog) await this.submitAndCloseDialog();
   }
 
   async setDateDueDate(newDate = '', closeDialog = true) {
-    await BoardPage.btnDates.click();
+    await BoardPage.inputDate.clearValue();
     await BoardPage.inputDate.setValue(newDate);
+    if (closeDialog) await this.submitAndCloseDialog();
+  }
+
+  async submitAndCloseDialog() {
     await BoardPage.btnSubmit.click();
-    if (closeDialog) await BoardPage.btnCloseDialog.click();
+    await BoardPage.btnCloseDialog.click();
   }
 
   async typeAndAddCard(textToAdd) {
     await BoardPage.textareaListCard.setValue(textToAdd);
-    await BoardPage.btnSubmit.waitForClickable();
     await BoardPage.btnSubmit.click();
+    await BoardPage.btnCloseCardComposer.click();
   }
 
   async createCardInList(listTitle, textToAdd) {
     const listBoards = await BoardPage.listBoards;
 
     for (const listBoard of listBoards) {
-      const elementFound = await listBoard.$(`//h2[text()="${listTitle}"]`);
+      const elementFound = await BoardPage.listBoardWithText(
+        listBoard,
+        listTitle
+      );
       if (await elementFound.isExisting()) {
-        const addButton = await listBoard.$(
-          '//button[@data-testid="list-add-card-button"]'
-        );
-        try {
-          await addButton.click();
-        } catch (error) {
-          console.info(`Already opened: ${error}`);
-        }
+        const addButton = await BoardPage.btnAddCardFromList(listBoard);
+        await addButton.click();
         await this.typeAndAddCard(textToAdd);
         return;
       }

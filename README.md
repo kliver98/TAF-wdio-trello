@@ -26,3 +26,13 @@ Then type
 ```
 npx wdio run wdio.conf.js
 ```
+
+## Better coding practices applied
+
+- Layered architecture:
+  - Page Object Layer: This layer encapsulates the web elements and actions on the web pages. This promotes code reusability and encapsulation.
+  - Workflows Layer: This layer abstracts business logic or user flows, combining multiple page actions into higher-level operations (e.g., login, creating a board).
+  - Test Specs Layer: The topmost layer where actual test cases are written.
+  - Utilities Layer: Holds helper methods like time-related utilities (timeUtils.js) and wait logic (waitUtils.js). These are commonly reused across pages, workflows, and tests.
+- Page Object pattern: You can find this structure in folder `test/pageobjects` where each page, component or modal in trello workflows is reflected accordingly.
+- Code smells: used camelCase for file names, class names, methods.
